@@ -78,3 +78,96 @@ fun MATCH(exp: Exp, head: Pve, tail: Pve, atom: Pva) = IsCons(exp, head, tail, a
 
 fun EQ(x: Exp, y: Exp) = IsEqa(x, y)
 
+// ------------
+
+data class Bind(val variable: Var, val value: Exp) {
+    override fun equals(other: Any?): Boolean =
+        other != null && other is Bind && other.variable == this.variable
+
+    override fun hashCode(): Int = variable.hashCode()
+}
+
+typealias Env = List<Bind>
+
+data class State(val term: Term, val env: Env)
+
+operator fun List<Exp>.div(env: Env): List<Exp> = this.map { it / env }
+
+operator fun Exp.div(env: Env): Exp {
+    return when (this) {
+        is Atom -> this
+
+        is Cons -> Cons(head / env, tail / env)
+
+        is Var -> env.find { it.variable == this }!!.value
+
+        else -> throw NonExhaustiveMatchException(this)
+    }
+}
+
+class NonExhaustiveMatchException(obj: Any) : Exception("Non-exhaustive match $obj")
+
+operator fun Env.plus(other: Env): Env = this.plus(other as Iterable<Bind>).distinct()
+
+// ------------------
+
+abstract class CVar(val index: Int) : Exp() {
+    override fun equals(other: Any?): Boolean {
+        return other != null
+                && other is CVar
+                && this::class == other::class
+                && this.index == other.index
+    }
+
+    override fun hashCode(): Int {
+        return index.hashCode()
+    }
+}
+
+open class Cve(index: Int) : CVar(index) {
+    override fun toString(): String = "E.$index"
+}
+
+class Cva(index: Int) : Cve(index) {
+    override fun toString(): String = "A.$index"
+}
+
+typealias CBind = Bind
+typealias CEnv = Env
+typealias CExp = Exp
+
+class InEq(val left: CExp, val right: CExp) {
+    override fun equals(other: Any?): Boolean {
+        return other != null && other is InEq &&
+                ((left == other.left && right == other.right) || (left == other.right && right == other.left))
+    }
+
+    override fun hashCode(): Int {
+        var result = left.hashCode()
+        result = 31 * result + right.hashCode()
+        return result
+    }
+}
+
+sealed class Restriction
+
+object Inconsistent : Restriction()
+
+class Restr(val inEqs: List<InEq>) : Restriction()
+
+fun isContradiction(inEq: InEq): Boolean = inEq.left == inEq.right
+
+fun isTautology(inEq: InEq): Boolean =
+    if (inEq.left is Atom && inEq.right is Atom) {
+        inEq.left == inEq.right
+    } else false
+
+fun cleanRestr(restr: Restriction): Restriction =
+    when (restr) {
+        is Inconsistent -> Inconsistent
+        is Restr ->
+            if (restr.inEqs.any(::isContradiction))
+                Inconsistent
+            else
+                Restr(restr.inEqs.filter(::isTautology).distinct())
+    }
