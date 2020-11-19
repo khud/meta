@@ -1,24 +1,41 @@
 package metacourse.tsg
 
+/*
+ * a-val ::= (ATOM atom)
+ *
+ * e-val ::= a-val | (CONS e-val e-val)
+ *
+ * prog  ::= [def_1, ..., def_n]                        n >= 1
+ *
+ * def   ::= (DEFINE fname [parm_1, ..., parm_n])     n >= 0
+ *
+ * term  ::= (ALT cond term_1 term_2)
+ *         | (CALL fname [arg_1, ..., arg_n])           n >= 0
+ *         | e-exp
+ *
+ * cond  ::= (EQA' a-exp a-exp)
+ *         | (CONS' e-exp e-var e-var a-var)
+ *
+ * a-exp ::= a-val | a-var
+ *
+ * e-exp ::= a-val | a-var | e-var | (CONS e-exp e-exp)
+ *
+ * parm  ::= a-var | e-var
+ *
+ * arg   ::= a-exp | e-exp
+ *
+ * a-var ::= (PVA name)
+ *
+ * e-var ::= (PVE name)
+ */
 
-sealed class Exp
+interface Exp
 
-abstract class Val : Exp()
+interface Val: Exp
 
-abstract class Var(val name: Name) : Exp() {
-    override fun equals(other: Any?): Boolean {
-        return other != null
-                && other is Var
-                && this::class == other::class
-                && this.name == other.name
-    }
+interface Var: Exp
 
-    override fun hashCode(): Int {
-        return name.hashCode()
-    }
-}
-
-class Atom(val name: String) : Val() {
+class Atom(val name: String) : Val {
     override fun equals(other: Any?): Boolean {
         return other != null && other is Atom && other.name == name
     }
@@ -26,15 +43,17 @@ class Atom(val name: String) : Val() {
     override fun hashCode(): Int {
         return name.hashCode()
     }
+
+    override fun toString(): String = "'$name"
 }
 
-class Cons(val head: Exp, val tail: Exp) : Exp()
+data class Cons(val head: Exp, val tail: Exp) : Exp
 
-open class Pve(name: Name) : Var(name) {
+data class Pve(val name: Name) : Var {
     override fun toString(): String = "e.$name"
 }
 
-class Pva(name: Name) : Pve(name) {
+data class Pva(val name: Name) : Var {
     override fun toString(): String = "a.$name"
 }
 
@@ -80,7 +99,7 @@ fun EQ(x: Exp, y: Exp) = IsEqa(x, y)
 
 // ------------
 
-data class Bind(val variable: Var, val value: Exp) {
+class Bind(val variable: Var, val value: Exp) {
     override fun equals(other: Any?): Boolean =
         other != null && other is Bind && other.variable == this.variable
 
@@ -108,66 +127,3 @@ operator fun Exp.div(env: Env): Exp {
 class NonExhaustiveMatchException(obj: Any) : Exception("Non-exhaustive match $obj")
 
 operator fun Env.plus(other: Env): Env = this.plus(other as Iterable<Bind>).distinct()
-
-// ------------------
-
-abstract class CVar(val index: Int) : Exp() {
-    override fun equals(other: Any?): Boolean {
-        return other != null
-                && other is CVar
-                && this::class == other::class
-                && this.index == other.index
-    }
-
-    override fun hashCode(): Int {
-        return index.hashCode()
-    }
-}
-
-open class Cve(index: Int) : CVar(index) {
-    override fun toString(): String = "E.$index"
-}
-
-class Cva(index: Int) : Cve(index) {
-    override fun toString(): String = "A.$index"
-}
-
-typealias CBind = Bind
-typealias CEnv = Env
-typealias CExp = Exp
-
-class InEq(val left: CExp, val right: CExp) {
-    override fun equals(other: Any?): Boolean {
-        return other != null && other is InEq &&
-                ((left == other.left && right == other.right) || (left == other.right && right == other.left))
-    }
-
-    override fun hashCode(): Int {
-        var result = left.hashCode()
-        result = 31 * result + right.hashCode()
-        return result
-    }
-}
-
-sealed class Restriction
-
-object Inconsistent : Restriction()
-
-class Restr(val inEqs: List<InEq>) : Restriction()
-
-fun isContradiction(inEq: InEq): Boolean = inEq.left == inEq.right
-
-fun isTautology(inEq: InEq): Boolean =
-    if (inEq.left is Atom && inEq.right is Atom) {
-        inEq.left == inEq.right
-    } else false
-
-fun cleanRestr(restr: Restriction): Restriction =
-    when (restr) {
-        is Inconsistent -> Inconsistent
-        is Restr ->
-            if (restr.inEqs.any(::isContradiction))
-                Inconsistent
-            else
-                Restr(restr.inEqs.filter(::isTautology).distinct())
-    }
