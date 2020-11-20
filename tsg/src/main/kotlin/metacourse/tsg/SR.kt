@@ -1,10 +1,12 @@
 package metacourse.tsg
 
-data class Cve(val index: Int) : CExp {
+interface CVar
+
+data class Cve(val index: Int) : CExp, CVar {
     override fun toString(): String = "E.$index"
 }
 
-data class Cva(val index: Int) : CExp {
+data class Cva(val index: Int) : CExp, CVar {
     override fun toString(): String = "A.$index"
 }
 
@@ -79,3 +81,9 @@ fun less(x: CExp, y: CExp): Boolean {
 
     throw IllegalArgumentException("$x ? $y")
 }
+
+data class SBind(val cva: CVar, val exp: CExp)
+
+typealias Subst = List<SBind>
+
+fun Subst.dom(): List<CVar> = map { it.cva }
