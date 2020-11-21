@@ -48,14 +48,14 @@ fun isTautology(inEq: InEq): Boolean =
         inEq.left != inEq.right
     } else false
 
-fun cleanRestr(restr: Restriction): Restriction =
-    when (restr) {
+fun Restriction.clean(): Restriction =
+    when (this) {
         is Inconsistent -> Inconsistent
         is Restr ->
-            if (restr.inEqs.any(::isContradiction))
+            if (inEqs.any(::isContradiction))
                 Inconsistent
             else
-                Restr(restr.inEqs.filterNot(::isTautology).distinct())
+                Restr(inEqs.filterNot(::isTautology).distinct())
     }
 
 fun less(x: CExp, y: CExp): Boolean {
@@ -87,3 +87,22 @@ data class SBind(val cva: CVar, val exp: CExp)
 typealias Subst = List<SBind>
 
 fun Subst.dom(): List<CVar> = map { it.cva }
+
+operator fun CExp.div(s: Subst): CExp {
+    return when (this) {
+        is Atom -> this
+        is Cons -> Cons(this.head / s, this.tail / s)
+        is CVar -> s.find { it.cva == this }?.exp ?: this
+        else -> throw NonExhaustiveMatchException(s)
+    }
+}
+
+operator fun InEq.div(s: Subst) = InEq(left / s, right / s)
+
+operator fun CBind.div(s: Subst) = CBind(variable, value / s)
+
+operator fun Restriction.div(s: Subst) =
+    when (this) {
+        is Inconsistent -> Inconsistent
+        is Restr -> Restr(this.inEqs.map { it / s }).clean()
+    }
