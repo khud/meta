@@ -1,1 +1,1 @@
-include("tsg", "slides", "problems")
+include("tsg", "flowchart", "slides", "problems")
