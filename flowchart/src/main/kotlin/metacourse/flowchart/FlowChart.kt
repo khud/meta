@@ -39,15 +39,15 @@ data class Op(val func: Func, val args: List<Expr>): Expr()
 
 typealias Val = String
 
-typealias Func = (List<Expr>) -> Expr
+typealias Func = String
 
 sealed class Jump
 
 data class Goto(val label: Label): Jump()
 
-data class If(val expr: Expr, val goto: Label, val otherwise: Label)
+data class If(val expr: Expr, val goto: Label, val otherwise: Label): Jump()
 
-data class Return(val expr: Expr)
+data class Return(val expr: Expr): Jump()
 
 
 
