@@ -48,7 +48,7 @@ fun eval(expr: Expr, env: Env): Expr {
         is Var -> env[expr]
         is Op -> {
             val builtIn = env.buildIns[expr.func] ?: throw IllegalArgumentException("No such built-in ${expr.func}")
-            val args = expr.args.map { eval(it, env) }
+            val args = expr.params.map { eval(it, env) }
             builtIn(args)
         }
     }

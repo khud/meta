@@ -35,7 +35,7 @@ data class Var(val name: String): Expr()
 
 data class Constant(val value: Val): Expr()
 
-data class Op(val func: Func, val args: List<Expr>): Expr()
+data class Op(val func: Func, val params: List<Expr>): Expr()
 
 typealias Val = String
 
