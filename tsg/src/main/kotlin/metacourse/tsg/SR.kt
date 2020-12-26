@@ -1,6 +1,10 @@
 package metacourse.tsg
 
-interface CVar
+typealias CBind = Bind
+typealias CEnv = Env
+typealias CExp = Exp
+
+interface CVar : CExp
 
 data class Cve(val index: Int) : CExp, CVar {
     override fun toString(): String = "E.$index"
@@ -10,9 +14,6 @@ data class Cva(val index: Int) : CExp, CVar {
     override fun toString(): String = "A.$index"
 }
 
-typealias CBind = Bind
-typealias CEnv = Env
-typealias CExp = Exp
 
 class InEq(val left: CExp, val right: CExp) {
     override fun equals(other: Any?): Boolean {
@@ -57,6 +58,11 @@ fun Restriction.clean(): Restriction =
             else
                 Restr(inEqs.filterNot(::isTautology).distinct())
     }
+
+operator fun Restriction.plus(other: Restriction): Restriction {
+    if (this is Inconsistent || other is Inconsistent) return Inconsistent
+    return Restr((this as Restr).inEqs + (other as Restr).inEqs).clean()
+}
 
 fun less(x: CExp, y: CExp): Boolean {
     if (x is Atom && y is Atom) return x.name < y.name
@@ -106,3 +112,60 @@ operator fun Restriction.div(s: Subst) =
         is Inconsistent -> Inconsistent
         is Restr -> Restr(this.inEqs.map { it / s }).clean()
     }
+
+
+operator fun Subst.times(other: Subst): Subst {
+    val dom = (dom() + other.dom()).distinct()
+    return dom.map { SBind(it, (it / this) / other) }
+}
+
+operator fun CEnv.div(subst: Subst): CEnv = this.map { it / subst }
+
+sealed class Contraction
+data class S(val subst: Subst) : Contraction()
+data class R(val restr: Restriction) : Contraction()
+
+abstract class SR<T>(val t: T) {
+    abstract operator fun div(subst: Subst): T
+}
+
+operator fun <T> Pair<SR<T>, Restriction>.div(contraction: Contraction): Pair<T, Restriction> {
+    return when (contraction) {
+        is S -> Pair(first / contraction.subst, second / contraction.subst)
+        is R -> Pair(first.t, second + contraction.restr)
+    }
+}
+
+@JvmName("div0")
+operator fun Pair<CExp, Restriction>.div(contraction: Contraction): Pair<CExp, Restriction> {
+    val sr = object : SR<CExp>(first) {
+        override fun div(subst: Subst): CExp = first / subst
+    }
+    return Pair(sr, second) / contraction
+}
+
+@JvmName("div1")
+operator fun Pair<List<CExp>, Restriction>.div(contraction: Contraction): Pair<List<CExp>, Restriction> {
+    val sr = object : SR<List<CExp>>(first) {
+        override fun div(subst: Subst): List<CExp> = first.map { it / subst }
+    }
+    return Pair(sr, second) / contraction
+}
+
+@JvmName("div2")
+operator fun Pair<CBind, Restriction>.div(contraction: Contraction): Pair<CBind, Restriction> {
+    val sr = object : SR<CBind>(first) {
+        override fun div(subst: Subst): CBind = first / subst
+    }
+    return Pair(sr, second) / contraction
+}
+
+@JvmName("div3")
+operator fun Pair<CEnv, Restriction>.div(contraction: Contraction): Pair<CEnv, Restriction> {
+    val sr = object : SR<CEnv>(first) {
+        override fun div(subst: Subst): CEnv = first / subst
+    }
+    return Pair(sr, second) / contraction
+}
+
+
