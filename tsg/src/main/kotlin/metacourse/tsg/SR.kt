@@ -168,4 +168,6 @@ operator fun Pair<CEnv, Restriction>.div(contraction: Contraction): Pair<CEnv, R
     return Pair(sr, second) / contraction
 }
 
+val idC = S(listOf())
+val emptyC = R(Inconsistent)
 
