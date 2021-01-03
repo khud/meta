@@ -99,7 +99,7 @@ operator fun CExp.div(s: Subst): CExp {
         is Atom -> this
         is Cons -> Cons(this.head / s, this.tail / s)
         is CVar -> s.find { it.cva == this }?.exp ?: this
-        else -> throw NonExhaustiveMatchException(s)
+        else -> throw IllegalArgumentException(s.toString())
     }
 }
 

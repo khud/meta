@@ -38,10 +38,8 @@ fun cond(cond: Cond, env: Env): CondRes =
         is IsCons -> {
             when (val x = cond.exp / env) {
                 is Cons -> CondRes(true, listOf(Bind(cond.head, x.head), Bind(cond.tail, x.tail)))
-
                 is Atom -> CondRes(false, listOf(Bind(cond.atom, x)))
-
-                else -> throw NonExhaustiveMatchException(x)
+                else -> throw IllegalArgumentException(x.toString())
             }
         }
     }

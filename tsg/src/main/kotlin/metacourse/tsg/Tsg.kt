@@ -31,9 +31,9 @@ package metacourse.tsg
 
 interface Exp
 
-interface Val: Exp
+interface Val : Exp
 
-interface Var: Exp
+interface Var : Exp
 
 class Atom(val name: String) : Val {
     override fun equals(other: Any?): Boolean {
@@ -115,15 +115,10 @@ operator fun List<Exp>.div(env: Env): List<Exp> = this.map { it / env }
 operator fun Exp.div(env: Env): Exp {
     return when (this) {
         is Atom -> this
-
         is Cons -> Cons(head / env, tail / env)
-
         is Var -> env.find { it.variable == this }!!.value
-
-        else -> throw NonExhaustiveMatchException(this)
+        else -> throw IllegalArgumentException(this.toString())
     }
 }
-
-class NonExhaustiveMatchException(obj: Any) : Exception("Non-exhaustive match $obj")
 
 operator fun Env.plus(other: Env): Env = this.plus(other as Iterable<Bind>).distinct()
