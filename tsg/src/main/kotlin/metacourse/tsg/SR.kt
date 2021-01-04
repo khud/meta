@@ -4,16 +4,15 @@ typealias CBind = Bind
 typealias CEnv = Env
 typealias CExp = Exp
 
-interface CVar : CExp
+open class CVar(val index: Int): Var
 
-data class Cve(val index: Int) : CExp, CVar {
+class Cve(index: Int) : CVar(index) {
     override fun toString(): String = "E.$index"
 }
 
-data class Cva(val index: Int) : CExp, CVar {
+class Cva(index: Int) : CVar(index) {
     override fun toString(): String = "A.$index"
 }
-
 
 class InEq(val left: CExp, val right: CExp) {
     override fun equals(other: Any?): Boolean {
@@ -170,4 +169,6 @@ operator fun Pair<CEnv, Restriction>.div(contraction: Contraction): Pair<CEnv, R
 
 val idC = S(listOf())
 val emptyC = R(Inconsistent)
+
+typealias Class = Pair<List<CExp>, Restriction>
 
