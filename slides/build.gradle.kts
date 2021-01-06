@@ -14,6 +14,7 @@ dependencies {
     implementation(kotlin("script-runtime"))
     implementation("io.kotex:kotex-core:$kotexVersion")
     implementation("io.kotex:kotex-beamer:$kotexVersion")
+    implementation("io.kotex:kotex-bibtex:$kotexVersion")
     implementation(kotlin("reflect"))
 }
 

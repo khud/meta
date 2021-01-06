@@ -7,8 +7,8 @@ import io.kotex.core.Preamble
 fun createPreamble(lectureTitle: String): Preamble {
     val preamble = beamer {
         title = "Введение в метавычисления"
-        subtitle = "Лекция 1: Введение"
-        author = "Vitaly Khudobakhshov" / "JetBrains"
+        subtitle = lectureTitle
+        author = "Виталий Худобахшов" / "МКН СПбГУ"
         theme = "metropolis"
         date = today()
         aspectRatio = AspectRatio.RATIO_1610

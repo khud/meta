@@ -2,34 +2,13 @@ import io.kotex.beamer.frame
 import io.kotex.core.document
 import io.kotex.core.makeTitle
 import metacourse.slides.createPreamble
+import java.io.File
 
 val doc = document(createPreamble("Язык TSG")) {
     makeTitle()
 
-    section("Языки типа Lisp") {
-        frame("История вопроса") {
+    section("Введение") {
 
-        }
-
-        frame("Деревья абстрактного синтаксиса") {
-
-        }
-
-        frame("Атомы и S-выражения") {
-
-        }
-
-        frame("Рекурсия") {
-
-        }
-
-        frame("Плоские языки") {
-
-        }
-
-        frame("Связь с \\lambda-исчислением") {
-
-        }
     }
 
     section("Синтаксис языка") {
@@ -37,8 +16,39 @@ val doc = document(createPreamble("Язык TSG")) {
 
         }
 
-        frame("Грамматика") {
+        frame("Грамматика, часть I") {
+            verbatim("""
+            a-val ::= (ATOM atom)
+ 
+            e-val ::= a-val | (CONS e-val e-val)
 
+            prog  ::= [def_1, ..., def_n]                        n >= 1
+ 
+            def   ::= (DEFINE fname [param_1, ..., param_n])     n >= 0
+ 
+            term  ::= (ALT cond term_1 term_2)
+                    | (CALL fname [arg_1, ..., arg_n])           n >= 0
+                    | e-exp
+
+            cond  ::= (EQA' a-exp a-exp)
+                    | (CONS' e-exp e-var e-var a-var)
+            """)
+        }
+
+        frame("Грамматика, часть II") {
+            verbatim("""
+            a-exp ::= a-val | a-var
+ 
+            e-exp ::= a-val | a-var | e-var | (CONS e-exp e-exp)
+            
+            param  ::= a-var | e-var
+            
+            arg   ::= a-exp | e-exp
+            
+            a-var ::= (PVA name)
+
+            e-var ::= (PVE name)     
+            """)
         }
 
         frame("Ветвления") {
@@ -63,4 +73,9 @@ val doc = document(createPreamble("Язык TSG")) {
 
         }
     }
-}
+}.toTex()
+
+val outputDir = File("../../../../../tex/")
+if (!outputDir.exists()) outputDir.mkdirs()
+
+File("$outputDir/lecture03.tex").writeText(doc)
