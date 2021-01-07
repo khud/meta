@@ -1,19 +1,37 @@
 import io.kotex.beamer.frame
+import io.kotex.bibtex.cite
 import io.kotex.core.document
 import io.kotex.core.makeTitle
-import metacourse.slides.createPreamble
+import metacourse.slides.*
 import java.io.File
 
 val doc = document(createPreamble("Язык TSG")) {
     makeTitle()
 
     section("Введение") {
-
+        +"""
+        Язык TSG - это алгоритмически полный функциональный язык первого порядка, 
+        ориентированный на обработку символьной информации. 
+          
+        TSG является модификацией языка S-Graph${cite(gluck1993occam)}, который, в свою очередь связан с
+        понятием Рефал-граф${cite(turchin88algorithm)}.
+        """
     }
 
     section("Синтаксис языка") {
         frame("a-значения и e-значения") {
-
+            +"Данные в языке представляют собой:"
+            itemize {
+                -"Атомы - неделимые элементы из некоторого фиксированного конечного множества;"
+                -"S-выражения, построенные при помощи конструктора ${verb("CONS")}."
+            }
+            +"Также будем использовать следующие обозначения:"
+            itemize {
+                -"a-значения -- значения, имеющие вид вид (ATOM atom);"
+                -"e-значения -- произвольные S-выражения;"
+                -"${verb("AVal")} - множество всех a-значений;"
+                -"${verb("EVal")} - множество всех e-значений."
+            }
         }
 
         frame("Грамматика, часть I") {

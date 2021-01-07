@@ -32,3 +32,24 @@ val mcCarty60 = article(
     pages = "184–195"
 //    numpages = {12}
 )
+
+val turchin88algorithm = article(
+    id = "turchin1988algorithm",
+    title = "The algorithm of generalization in the supercompiler",
+    author="Turchin, Valentin F",
+    journal="Partial Evaluation and Mixed Computation",
+    volume=531,
+    pages="549",
+    year=1988
+//    publisher={North-Holland Amsterdam}
+)
+
+val gluck1993occam = inProceedings(
+    id = "gluck1993occam",
+    title = "Occam's razor in metacomputation: the notion of a perfect process tree",
+    author="Gl{\"u}ck, Robert and Klimov, Andrei V",
+    bookTitle="International Workshop on Static Analysis",
+    pages="112--123",
+    year=1993,
+    organization="Springer"
+)
