@@ -1,7 +1,6 @@
 import io.kotex.beamer.frame
 import io.kotex.bibtex.cite
 import io.kotex.core.document
-import io.kotex.core.footnote
 import io.kotex.core.makeTitle
 import metacourse.slides.*
 import java.io.File
@@ -10,13 +9,15 @@ val doc = document(createPreamble("Язык TSG")) {
     makeTitle()
 
     section("Введение") {
-        +"""
-        Язык TSG${footnote("TSG - сокращение от Typed S-Graph")} - это алгоритмически полный функциональный 
-        язык первого порядка, ориентированный на обработку символьной информации. 
-          
-        TSG является модификацией языка S-Graph${cite(gluck1993occam)}, который, в свою очередь связан с
-        понятием Рефал-граф${cite(turchin88algorithm)}.
-        """
+        frame("Язык реализации") {
+            +"""
+            Язык TSG${footnote("TSG - сокращение от Typed S-Graph")} - это алгоритмически полный функциональный 
+            язык первого порядка, ориентированный на обработку символьной информации. 
+              
+            TSG является модификацией языка S-Graph${cite(gluck1993occam)}, который, в свою очередь связан с
+            понятием Рефал-граф${cite(turchin88algorithm)}.
+            """
+        }
     }
 
     section("Синтаксис языка") {
@@ -45,12 +46,12 @@ val doc = document(createPreamble("Язык TSG")) {
  
             def   ::= (DEFINE fname [param_1, ..., param_n])     n >= 0
  
-            term  ::= (ALT cond term_1 term_2)
+            term  ::= (IF cond term_1 term_2)
                     | (CALL fname [arg_1, ..., arg_n])           n >= 0
                     | e-exp
 
-            cond  ::= (EQA' a-exp a-exp)
-                    | (CONS' e-exp e-var e-var a-var)
+            cond  ::= (EQ a-exp a-exp)
+                    | (MATCH e-exp e-var e-var a-var)
             """)
         }
 
@@ -87,19 +88,18 @@ val doc = document(createPreamble("Язык TSG")) {
 
         frame("Ветвления") {
             +"""
-            В условных конструкциях ${verb("(ALT cond term1 term2)")} языка TSG в качестве условия ветвления—cond—могут 
-            быть использованы следующие конструкции:
+            В условных конструкциях ${verb("IF (cond, then, otherwise)")} языка TSG в качестве условия ветвления—cond—могут 
+            быть использованы следующие конструкции${footnote("В оригинальной работе EQA' и CONS' соответственно")}:
             """
             itemize {
-                -verb("(EQA' x y)")
-                -verb("(CONS' x evh evt av)")
+                -verb("EQ(x, y)")
+                -verb("MATCH(x, head, tail, atom)")
             }
         }
 
-        frame("Конструкция EQA'") {
-            itemize {
-                -verb("(EQA' x y)")
-            }
+        frame("Конструкция EQ") {
+            verbatim("EQ(x, y)")
+
             +"""
             Проверка равенства двух a-значений (атомов)—если значения a-выражений x и y— суть один и тот же 
             атом, то проверка считается успешной (условие выполнено), в противном случае проверка считается 
@@ -107,18 +107,21 @@ val doc = document(createPreamble("Язык TSG")) {
             """
         }
 
-        frame("Конструкция CONS'") {
-            itemize {
-                -verb("(CONS' x evh evt av)")
-            }
+        frame("Конструкция MATCH") {
+            verbatim("MATCH(x, head, tail, atom)")
+
+            val head = verb("head")
+            val tail = verb("tail")
+            val atom = verb("atom")
+
             +"Анализ вида e-значения:"
             itemize {
                 -"""
-                если значение e-выражения x имеет вид ${verb("(CONS a b)")}, то e-переменные evh, evt связываются (принимают 
+                если значение e-выражения x имеет вид $consAB, то e-переменные $head, $tail связываются (принимают 
                 значения) соответственно с e-значениями a, b и проверка считается успешной;    
                 """
                 -"""
-                если значение x имеет вид ${verb("(ATOM a)")}, то a-переменная av связывается с a-значением x и 
+                если значение x имеет вид $atomA, то a-переменная $atom связывается с a-значением x и 
                 проверка считается неуспешной.    
                 """
             }
@@ -129,7 +132,37 @@ val doc = document(createPreamble("Язык TSG")) {
         }
 
         frame("Поиск подстроки в строке") {
+            verbatim("""
+            DEFINE("Match", eSubstr, eString) {
+                CALL("CheckPos", eSubstr, eString, eSubstr, eString)
+            },
+            
+            DEFINE("NextPos", eSubstring, eString) {
+                IF (MATCH( eString, e_,  eStringTail, a_)) {
+                    CALL("Match", eSubstring, eStringTail)
+                } ELSE {
+                    FAILURE
+                }
+            }
+            """)
+        }
 
+        frame("Поиск подстроки в строке (продолжение)") {
+            verbatim("""
+            DEFINE("CheckPos", eSubs, eStr, eSubstring, eString) {
+              IF (MATCH(eSubs, eSubsHead, eSubsTail, a_)) {
+                IF (MATCH(eSubsHead, e_,  e_,  aSubsHead)) { FAILURE } ELSE {
+                  IF (MATCH(eStr, eStrHead, eStrTail, a_)) {
+                    IF (MATCH(eStrHead, e_, e_, aStrHead)) { FAILURE } ELSE {
+                      IF (MATCH(eStrHead, e_, e_, aStrHead)) { FAILURE } ELSE {
+                        IF (EQ(aSubsHead, aStrHead)) {
+                          CALL("CheckPos", eSubsTail, eStrTail, eSubstring, eString)
+                        } ELSE {
+                          CALL("NextPos", eSubstring, eString)
+                        }}}
+                  } ELSE { FAILURE }}
+                } ELSE { SUCCESS }}
+            """)
         }
     }
 

@@ -1,6 +1,7 @@
 package metacourse.slides
 
 import io.kotex.beamer.AspectRatio
+import io.kotex.beamer.Frame
 import io.kotex.beamer.beamer
 import io.kotex.core.Preamble
 
@@ -18,3 +19,9 @@ fun createPreamble(lectureTitle: String): Preamble {
     preamble.usePackage("babel", opts = listOf("russian"))
     return preamble
 }
+
+val Frame.consAB
+    get() = this.verb("(CONS a b)")
+
+val Frame.atomA
+    get() = this.verb("(ATOM a)")
