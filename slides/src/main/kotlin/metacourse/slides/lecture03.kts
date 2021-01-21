@@ -2,6 +2,7 @@ import io.kotex.beamer.frame
 import io.kotex.bibtex.cite
 import io.kotex.core.document
 import io.kotex.core.makeTitle
+import io.kotex.core.write
 import metacourse.slides.*
 import java.io.File
 
@@ -229,9 +230,6 @@ val doc = document(createPreamble("Язык TSG")) {
             }
         }
     }
-}.toTex()
+}
 
-val outputDir = File("../../../../../tex/")
-if (!outputDir.exists()) outputDir.mkdirs()
-
-File("$outputDir/lecture03.tex").writeText(doc)
+doc.write("../../../../../tex/lecture03.tex")

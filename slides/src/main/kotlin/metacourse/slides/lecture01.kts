@@ -347,6 +347,6 @@ val doc = document(createPreamble("Введение")) {
 //        \end{frame}
     }
 
-}.toTex()
+}
 
-File("../../../../../tex/lecture01.tex").writeText(doc)
+doc.write("../../../../../tex/lecture01.tex")

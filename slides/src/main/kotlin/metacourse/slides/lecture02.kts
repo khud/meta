@@ -57,9 +57,6 @@ val doc = document(createPreamble("Метавычисления")) {
 //        }
         }
     }
-}.toTex()
+}
 
-val outputDir = File("../../../../../tex/")
-if (!outputDir.exists()) outputDir.mkdirs()
-
-File("$outputDir/lecture02.tex").writeText(doc)
+doc.write("../../../../../tex/lecture02.tex")
