@@ -4,7 +4,6 @@ import io.kotex.core.document
 import io.kotex.core.makeTitle
 import io.kotex.core.write
 import metacourse.slides.*
-import java.io.File
 
 val doc = document(createPreamble("Язык TSG")) {
     makeTitle()
@@ -15,8 +14,8 @@ val doc = document(createPreamble("Язык TSG")) {
             Язык TSG${footnote("TSG - сокращение от Typed S-Graph")} - это алгоритмически полный функциональный 
             язык первого порядка, ориентированный на обработку символьной информации. 
               
-            TSG является модификацией языка S-Graph${cite(gluck1993occam)}, который, в свою очередь связан с
-            понятием Рефал-граф${cite(turchin88algorithm)}.
+            TSG является модификацией языка S-Graph${cite(Bib.gluck1993occam)}, который, в свою очередь связан с
+            понятием Рефал-граф${cite(Bib.turchin88algorithm)}.
             """
         }
     }
