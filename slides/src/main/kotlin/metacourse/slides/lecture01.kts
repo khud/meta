@@ -1,7 +1,8 @@
 import io.kotex.beamer.frame
+import io.kotex.bibtex.cite
 import io.kotex.core.*
+import metacourse.slides.Bib
 import metacourse.slides.createPreamble
-import java.io.File
 
 val doc = document(createPreamble("Введение")) {
     makeTitle()
@@ -232,7 +233,7 @@ val doc = document(createPreamble("Введение")) {
 
         frame("Интерпретатор") {
             +"""Интерпретатором языка $ L $ назвается программа $ int: P \times D \to D$ написанная на языке $ L_0 $ для 
-            которой выполняется следующее свойство \cite{AbramovMeta}:
+            которой выполняется следующее свойство ${cite(Bib.abramovMeta)}:
     
             \[
             int(p, d) = p(d), \forall p \in P, \forall d \in D
@@ -259,7 +260,7 @@ val doc = document(createPreamble("Введение")) {
             В этом случае $ spec(int, p) $ делает то же самое, что и программа $ p $, но уже на языке $ S $, т.е. 
             $ spec(int, p)$ - это \textbf{результат компиляции} $ p $ с языка $ L $ в язык $ S $.
             
-            Равенство (\ref{eqn:Futamura1}) называется \textbf{первой проекцией Футамуры} \cite{Futamura71}."""
+            Равенство (\ref{eqn:Futamura1}) называется \textbf{первой проекцией Футамуры} ${cite(Bib.futamura71)}."""
         }
 
         frame("Метациклический случай") {
@@ -290,7 +291,7 @@ val doc = document(createPreamble("Введение")) {
         frame("Суперкомпиляция - С. М. Абрамов") {
             +"""\textbf{Суперкомпиляция}—один из разделов метавычислений, совокупность понятий, 
             методов и алгоритмов метавычислений, позволяющих выполнять глубокие преобразования 
-            программ на языке $ L $ \cite{AbramovMetaDop}."""
+            программ на языке $ L $ ${cite(Bib.abramovMetaDop)}."""
 
             +"""Аргументами суперкомпилятора являются: $ p \in P $ — программа на языке $ L $ и $\mathcal{C}$—класс, 
             обобщенные данные для $ p $."""
@@ -326,7 +327,7 @@ val doc = document(createPreamble("Введение")) {
                 -"Для динамических языков во время специализации собирается информация о типах"
                 -"Показывает отличные результаты in production"
                 itemize {
-                    -"0.83x относительно V8 для JavaScript \\cite{Truffle17}"
+                    -"0.83x относительно V8 для JavaScript ${cite(Bib.truffle17)}"
                     -"3.8x относительно JRuby"
                     -"5x относительно GNU R"
                 }

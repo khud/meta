@@ -3,9 +3,8 @@ import io.kotex.beamer.columns
 import io.kotex.beamer.frame
 import io.kotex.bibtex.cite
 import io.kotex.core.*
+import metacourse.slides.Bib
 import metacourse.slides.createPreamble
-import metacourse.slides.mcCarty60
-import java.io.File
 
 val doc = document(createPreamble("Метавычисления")) {
     makeTitle()
@@ -28,7 +27,7 @@ val doc = document(createPreamble("Метавычисления")) {
             frame("История вопроса") {
                 +"""
             Язык программирования Lisp был предложен в работе Джона МакКарти (John McCarthy)
-            в 1958г. ${cite(mcCarty60)}
+            в 1958г. ${cite(Bib.mcCarty60)}
             """.footnote("History of Lisp: http://jmc.stanford.edu/articles/lisp/lisp.pdf")
             }
 
