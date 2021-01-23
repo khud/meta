@@ -1,5 +1,7 @@
 import io.kotex.beamer.frame
+import io.kotex.bibtex.bibliography
 import io.kotex.bibtex.cite
+import io.kotex.bibtex.generateBibTex
 import io.kotex.core.*
 import metacourse.slides.Bib
 import metacourse.slides.createPreamble
@@ -23,7 +25,7 @@ val doc = document(createPreamble("Введение")) {
             +"""
             Пусть программа p задает некоторое множество C элементарных вычислительных актов и пусть задано разбиение
             $ \mu $ этого множества на два составляющих $ \mu : C = C' \cup C'' $. Одно из них,
-            C' , назовем \textbf{множеством допустимых вычислений}, а другое, C'', – 
+            C' , назовем ${"множеством допустимых вычислений".bold()}, а другое, C'', – 
             ${"множеством задержанных вычислений".bold()}. Смешанные вычисления над программой $ p $ при разбиении – это
             процесс выполнения допустимых вычислений и формирования остаточной программы $ p_{\mu} $, 
             имеющей своим множеством вычислений множество $ C'' $ задержанных вычислений.
@@ -332,6 +334,13 @@ val doc = document(createPreamble("Введение")) {
                     -"5x относительно GNU R"
                 }
             }
+        }
+
+        appendix()
+
+        frame("Литература") {
+            generateBibTex("lecture01")
+            bibliography("plain")
         }
 //
 //        \begin{frame}[standout]
