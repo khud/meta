@@ -1,9 +1,7 @@
 package metacourse.slides
 
-import io.kotex.beamer.AspectRatio
-import io.kotex.beamer.Frame
-import io.kotex.beamer.beamer
-import io.kotex.core.Preamble
+import io.kotex.beamer.*
+import io.kotex.core.*
 
 fun createPreamble(lectureTitle: String): Preamble {
     val preamble = beamer {
@@ -25,3 +23,13 @@ val Frame.consAB
 
 val Frame.atomA
     get() = this.verb("(ATOM a)")
+
+fun Tag.twoColsFrame(title: String, imagePath: String, ratio: Double = 0.6, left: Column.() -> Unit): Frame =
+    frame(title) {
+        columns {
+            column(ratio * textWidth(), left)
+            column((1.0 - ratio) * textWidth()) {
+                includeGraphics(imagePath, textWidth())
+            }
+        }
+    }
