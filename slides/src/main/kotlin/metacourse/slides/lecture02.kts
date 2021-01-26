@@ -6,21 +6,8 @@ import io.kotex.core.*
 import metacourse.slides.Bib
 import metacourse.slides.createPreamble
 
-val doc = document(createPreamble("Метавычисления")) {
+val doc = document(createPreamble("Языки программирования")) {
     makeTitle()
-
-    section("История") {
-        frame("Валентин Федорович Турчин") {
-            columns {
-                column(0.6 * textWidth()) {
-                    +"Валентин Фёдорович Турчин (1931 -- 2010)"
-                }
-                column(0.4 * textWidth()) {
-                    includeGraphics("../assets/turchin.jpg", textWidth())
-                }
-            }
-        }
-    }
 
     section("Языки программирования") {
         subsection("Языки типа Lisp") {
