@@ -5,44 +5,57 @@ import io.kotex.bibtex.cite
 import io.kotex.core.*
 import metacourse.slides.Bib
 import metacourse.slides.createPreamble
+import metacourse.slides.withImage
 
 val doc = document(createPreamble("Языки программирования")) {
     makeTitle()
 
-    section("Языки программирования") {
-        subsection("Языки типа Lisp") {
-            frame("История вопроса") {
-                +"""
-            Язык программирования Lisp был предложен в работе Джона МакКарти (John McCarthy)
-            в 1958г. ${cite(Bib.mcCarty60)}
-            """.footnote("History of Lisp: http://jmc.stanford.edu/articles/lisp/lisp.pdf")
+    section("Языки типа Lisp") {
+        frame("Джон Маккарти") {
+            withImage("../assets/mccarthy.png") {
+                +"""${"Джон Маккарти".bold()} (англ. John McCarthy; 4 сентября 1927, Бостон — 24 октября 2011, Стэнфорд)
+                — американский информатик, автор термина «искусственный интеллект» (1956), 
+                изобретатель языка Лисп (1958)${footnote("History of Lisp:" + url("http://jmc.stanford.edu/articles/lisp/lisp.pdf"))}${cite(Bib.mcCarty60)}, 
+                основоположник функционального программирования, 
+                лауреат премии Тьюринга (1971) за огромный вклад в область исследований искусственного 
+                интеллекта.""".footnote(url("https://en.wikipedia.org/wiki/John_McCarthy_(computer_scientist)"))
             }
+        }
 
-            frame("Деревья абстрактного синтаксиса") {
-                +"""
+        frame("Деревья абстрактного синтаксиса") {
+            +"""
             Старайтесь избегать плохого перевода с английского термина ${"abstract syntax tree".textbf()}
             как абстрактное синтаксическое дерево. Дело в том что дерево на самом деле очень конкретное, а
             синтаксис абстрактный.
             """
-            }
+        }
 
-            frame("Атомы и S-выражения") {
+        frame("Атомы и S-выражения") {
+            +"""S-выражения это выражения, состоящие из символов, от англ. ${"symbolic expressions".bold()},
+            представляют собой (вложенные) списки. Например:"""
 
-            }
+            verbatim("'((this is (a nested)) list (that (represents a) tree))")
 
-            frame("Рекурсия") {
+            +"""Здесь ${verb("'this")} - это сокращенная форма для ${verb("(quote this)")}."""
 
-            }
+            +"\n\n"
 
-            frame("Плоские языки") {
+            +"Атомы - это листья S-выражений, как строки, только для них нельзя разложить посимвольно, т.е. они атомарны."
+        }
 
-            }
+        frame("S-выражения как деревья абстрактного синтаксиса") {
 
-//        frame("Связь с \\lambda-исчислением") {
-//
-//        }
+        }
+
+        frame("Рекурсия") {
+
+        }
+
+        frame("Плоские языки") {
+
         }
     }
+
 }
 
 doc.write("../../../../../tex/lecture02.tex")
