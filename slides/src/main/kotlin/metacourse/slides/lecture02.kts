@@ -15,11 +15,7 @@ val doc = document(createPreamble("Языки программирования")
             withImage("../assets/mccarthy.png") {
                 +"""${"Джон Маккарти".bold()} (англ. John McCarthy; 4 сентября 1927, Бостон — 24 октября 2011, Стэнфорд)
                 — американский информатик, автор термина «искусственный интеллект» (1956), 
-                изобретатель языка Лисп (1958)${footnote("History of Lisp:" + url("http://jmc.stanford.edu/articles/lisp/lisp.pdf"))}${
-                    cite(
-                        Bib.mcCarty60
-                    )
-                }, 
+                изобретатель языка Лисп (1958)${footnote("History of Lisp:" + url("http://jmc.stanford.edu/articles/lisp/lisp.pdf"))}${cite(Bib.mcCarty60)}, 
                 основоположник функционального программирования, 
                 лауреат премии Тьюринга (1971) за огромный вклад в область исследований искусственного 
                 интеллекта.""".footnote(url("https://en.wikipedia.org/wiki/John_McCarthy_(computer_scientist)"))
