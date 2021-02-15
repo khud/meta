@@ -77,7 +77,7 @@ object Bib {
 */
     val truffle17 = inProceedings(
         "Truffle17",
-        author = "Wurthinger, Thomas et al.",
+        author = "Th. Wurthinger et al.",
 //        author = "W\\\"{u}rthinger, Thomas and Wimmer, Christian and Humer, Christian and W\"{o}ss, Andreas and Stadler, Lukas and Seaton, Chris and Duboscq, Gilles and Simon, Doug and Grimmer, Matthias",
         title = "Practical Partial Evaluation for High-performance Dynamic Language Runtimes",
         bookTitle = "Proceedings of the 38th ACM SIGPLAN Conference on Programming Language Design and Implementation",
