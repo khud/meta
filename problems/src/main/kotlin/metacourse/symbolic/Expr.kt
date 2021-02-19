@@ -9,7 +9,7 @@ data class Multiply(val x: Expr, val y: Expr): Expr()
 data class Divide(val x: Expr, val y: Expr): Expr()
 data class Sin(val expr: Expr): Expr()
 
-fun eval(expr: Expr): Expr {
+fun eval(expr: Expr, env: Map<Variable, Value>): Expr {
     TODO()
 }
 
