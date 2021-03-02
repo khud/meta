@@ -1,22 +1,35 @@
+import io.kotex.beamer.Frame
 import io.kotex.beamer.frame
+import io.kotex.bibtex.bibliography
 import io.kotex.bibtex.cite
-import io.kotex.core.document
-import io.kotex.core.makeTitle
-import io.kotex.core.write
+import io.kotex.bibtex.generateBibTex
+import io.kotex.core.*
 import metacourse.slides.*
 
 val doc = document(createPreamble("Язык TSG")) {
     makeTitle()
 
+    fun Frame.atom(a: String) = verb("(ATOM $a)")
+
     section("Введение") {
         frame("Язык реализации") {
             +"""
             Язык TSG${footnote("TSG - сокращение от Typed S-Graph")} - это алгоритмически полный функциональный 
-            язык первого порядка, ориентированный на обработку символьной информации. 
+            язык первого порядка, ориентированный на обработку символьной информации${cite(Bib.abramovMeta)}. 
               
             TSG является модификацией языка S-Graph${cite(Bib.gluck1993occam)}, который, в свою очередь связан с
             понятием Рефал-граф${cite(Bib.turchin88algorithm)}.
             """
+        }
+
+        frame("Методическое пособие") {
+            withImage("../assets/metacomputing.png", ratio = 0.7) {
+                +"""Это одна из трех существующих книг, посвященных вопросу метавычислений, 
+                    в нашем курсе это будет аналог учебника. Некоторые доказательства в ней 
+                    для краткости опущены и код приводится частично.""".footnote("Более подробное изложение можно найти в докторской диссертации С. М. Абрамова")
+                +"""Нужно также помнить,
+                    что код в книге написан не на языке Haskell, а на языке Gofer."""
+            }
         }
     }
 
@@ -37,26 +50,29 @@ val doc = document(createPreamble("Язык TSG")) {
         }
 
         frame("Грамматика, часть I") {
-            verbatim("""
+            verbatim(
+                """
             a-val ::= (ATOM atom)
  
             e-val ::= a-val | (CONS e-val e-val)
 
-            prog  ::= [def_1, ..., def_n]                        n >= 1
+            prog  ::= [def_1, ..., def_n]                         n >= 1
  
-            def   ::= (DEFINE fname [param_1, ..., param_n])     n >= 0
+            def   ::= (DEFINE fname [param_1, ..., param_n] term) n >= 0
  
-            term  ::= (IF cond term_1 term_2)
-                    | (CALL fname [arg_1, ..., arg_n])           n >= 0
-                    | e-exp
+            term  ::= (ALT cond term_1 term_2)
+                    | (CALL fname [arg_1, ..., arg_n])            n >= 0
+                    | (RETURN e-exp)
 
-            cond  ::= (EQ a-exp a-exp)
-                    | (MATCH e-exp e-var e-var a-var)
-            """)
+            cond  ::= (EQA' a-exp a-exp)
+                    | (CONS' e-exp e-var e-var a-var)
+            """
+            )
         }
 
         frame("Грамматика, часть II") {
-            verbatim("""
+            verbatim(
+                """
             a-exp ::= a-val | a-var
  
             e-exp ::= a-val | a-var | e-var | (CONS e-exp e-exp)
@@ -68,7 +84,8 @@ val doc = document(createPreamble("Язык TSG")) {
             a-var ::= (PVA name)
 
             e-var ::= (PVE name)     
-            """)
+            """
+            )
         }
 
         frame("Некоторые полезные сокращения") {
@@ -88,146 +105,222 @@ val doc = document(createPreamble("Язык TSG")) {
 
         frame("Ветвления") {
             +"""
-            В условных конструкциях ${verb("IF (cond, then, otherwise)")} языка TSG в качестве условия ветвления—cond—могут 
-            быть использованы следующие конструкции${footnote("В оригинальной работе EQA' и CONS' соответственно")}:
+            В условных конструкциях ${verb("(ALT cond term1 term2)")} языка TSG в качестве условия ветвления—cond—могут
+            быть использованы следующие конструкции:
             """
             itemize {
-                -verb("EQ(x, y)")
-                -verb("MATCH(x, head, tail, atom)")
+                -verb("(EQA' x y)")
+                -verb("(CONS' x evh evt av)")
             }
         }
 
-        frame("Конструкция EQ") {
-            verbatim("EQ(x, y)")
+        frame("Конструкция EQA'") {
+            verbatim("(EQA' x y)")
+            val x = verb("x")
+            val y = verb("y")
 
             +"""
-            Проверка равенства двух a-значений (атомов)—если значения a-выражений x и y— суть один и тот же 
-            атом, то проверка считается успешной (условие выполнено), в противном случае проверка считается 
+            Проверка равенства двух a-значений (атомов)—если значения a-выражений $x и $y— суть один и тот же
+            атом, то проверка считается успешной (условие выполнено), в противном случае проверка считается
             неуспешной (условие не выполнено);
             """
         }
 
-        frame("Конструкция MATCH") {
-            verbatim("MATCH(x, head, tail, atom)")
+        frame("Конструкция CONS'") {
+            verbatim("(CONS' x evh evt av)")
+            val x = verb("x")
+            val cons = verb("(CONS a b)")
+            val evh = verb("evh")
+            val evt = verb("evt")
+            val a = verb("a")
+            val b = verb("b")
+            val atomA = atom("a")
+            val av = verb("av")
 
-            val head = verb("head")
-            val tail = verb("tail")
-            val atom = verb("atom")
-
-            +"Анализ вида e-значения:"
-            itemize {
-                -"""
-                если значение e-выражения x имеет вид $consAB, то e-переменные $head, $tail связываются (принимают 
-                значения) соответственно с e-значениями a, b и проверка считается успешной;    
-                """
-                -"""
-                если значение x имеет вид $atomA, то a-переменная $atom связывается с a-значением x и 
-                проверка считается неуспешной.    
-                """
+            enumerate {
+                -"""если значение e-выражения $x имеет вид $cons, то e-переменные $evh, $evt 
+                    связываются (принимают значения) соответственно с e-значениями $a, $b и проверка 
+                    считается успешной;"""
+                -"""если значение e-выражения $x имеет вид $atomA, то a-переменная $av связывается с a-значением 
+                    и проверка считается неуспешной."""
             }
         }
 
-        frame("Простейшая программа") {
-
+        frame("Простейшая программа на языке TSG") {
+            verbatim("""
+            id_prog :: Prog
+            id_prog = [
+              (DEFINE "Id" [e.x]
+                (RETURN e.x))
+              ] where e.x = (PVE "x")    
+            """)
+            +"${verb("e.x")} не является допустимым идентификатором в Haskell, поэтому в реальной программе лучше использовать ${verb("e'x")}."
         }
 
         frame("Поиск подстроки в строке") {
             verbatim("""
-            DEFINE("Match", eSubstr, eString) {
-                CALL("CheckPos", eSubstr, eString, eSubstr, eString)
-            },
-            
-            DEFINE("NextPos", eSubstring, eString) {
-                IF (MATCH( eString, e_,  eStringTail, a_)) {
-                    CALL("Match", eSubstring, eStringTail)
-                } ELSE {
-                    FAILURE
-                }
-            }
-            """)
+            match_prog :: Prog
+            match_prog = [
+            (DEFINE "Match"[e.substr,e.string]
+                (CALL "CheckPos"[e.substr,e.string,e.substr,e.string])
+              ),
+              (DEFINE "NextPos"[e.substring,e.string]
+                (ALT (CONS' e.string e._ e.string_tail a._)
+                  (CALL "Match"[e.substring, e.string_tail])
+                  (RETURN 'FAILURE)
+              )),            
+            """
+            )
         }
 
         frame("Поиск подстроки в строке (продолжение)") {
             verbatim("""
-            DEFINE("CheckPos", eSubs, eStr, eSubstring, eString) {
-              IF (MATCH(eSubs, eSubsHead, eSubsTail, a_)) {
-                IF (MATCH(eSubsHead, e_,  e_,  aSubsHead)) { FAILURE } ELSE {
-                  IF (MATCH(eStr, eStrHead, eStrTail, a_)) {
-                    IF (MATCH(eStrHead, e_, e_, aStrHead)) { FAILURE } ELSE {
-                      IF (MATCH(eStrHead, e_, e_, aStrHead)) { FAILURE } ELSE {
-                        IF (EQ(aSubsHead, aStrHead)) {
-                          CALL("CheckPos", eSubsTail, eStrTail, eSubstring, eString)
-                        } ELSE {
-                          CALL("NextPos", eSubstring, eString)
-                        }}}
-                  } ELSE { FAILURE }}
-                } ELSE { SUCCESS }}
+              (DEFINE "CheckPos" [e.subs,e.str,e.substring,e.string]
+                (ALT (CONS' e.subs e.subs_head e.subs_tail a._)
+                  (ALT (CONS' e.subs_head e._ e._ a.subs_head)
+                  (RETURN 'FAILURE)
+                  (ALT (CONS' e.str e.str_head e.str_tail a._)
+                    (ALT (CONS' e.str_head e._ e._ a.str_head)
+                      (RETURN 'FAILURE)
+                      (ALT (EQA' a.subs_head a.str_head)
+                        (CALL "CheckPos"[e.subs_tail,e.str_tail,
+                                          e.substring,e.string])
+                        (CALL "NextPos"[e.substring,e.string])
+                      ))
+                    (RETURN 'FAILURE)))
+                (RETURN 'SUCCESS)))]
+            """
+            )
+        }
+    }
+
+    section("Семантика языка TSG") {
+        val env = verb("env")
+        val env1 = verb("env'")
+        val t = verb("t")
+
+        frame("Среда и связи") {
+            val atomAtom = atom("atom")
+            +"""Будем называть ${"средой".italic()} список из ${"связей".italic()}—упорядоченных пар вида ${verb("var := value")}, 
+                связывающих программные переменные—${"var".italic()}—с их значениями—${"value".italic()}, при этом:"""
+            itemize {
+                -"значением a-переменной может быть только a-значение: $atomAtom;"
+                -"значением e-переменной может быть произвольное е-значение: $atomAtom или S-выражение."
+            }
+        }
+
+        frame("Состояние вычислений") {
+            +"""Упорядоченную пару ${verb("(term ,env)")}, где ${verb("term")}—программный терм, 
+                ${verb("env")}—среда, связывающая программные 
+                переменные из term с их значениями, будем называть состоянием вычисления."""
+            verbatim("""
+            state   ::= (term , env)
+            env     ::= [binding_1,...,binding_n]               n >= 0
+            binding ::= a-var := a-val | e-var := e-val    
+            """)
+        }
+
+        frame("Операция замены (подстановки)") {
+            +"${verb("t /. env")} - замена в конструкции $t вхождений переменных на их значения из среды $env."
+            newLine()
+            newLine()
+            +"Например, в результате операции:"
+            verbatim("(CONS (CONS a.x e.z) a.y) /. [a.x:='A,a.y:='B,e.z:='C]")
+            +"получаем:"
+            verbatim("(CONS (CONS 'A 'C) 'B)")
+        }
+
+        frame("Обновление среды") {
+            val ivar = "var".italic()
+            val ivalue = "value".italic()
+            +"Результатом операции ${verb("env +. env'")} является среда, связывающая переменную $ivar со значением $ivalue в том, и только в том случае, если:"
+            itemize {
+                -"$ivar связано со значением $ivalue в среде $env1, или"
+                -"$ivar связано со значением $ivalue в среде $env и при этом $ivar не связано ни с каким значением в среде $env1."
+            }
+            +"Например, результатом операции:"
+            verbatim("[a.x:='A,a.y:='B,e.z:='C] +. [e.z:=(CONS 'D 'E),e.u:='F]")
+            +"является:"
+            verbatim("[e.z:=(CONS 'D 'E),e.u:='F,a.x:='A,a.y:='B]")
+        }
+
+        frame("Вспомогательные функции") {
+           verbatim("""
+           class APPLY a b where (/.) :: a -> b -> a 
+           
+           instance APPLY Exp Env where
+             (ATOM a) /. env = ATOM a
+             (CONS h t) /. env = CONS (h /. env) (t /. env)
+             var /. env = head [ x | (v := x) <- env, v == var ]
+           
+           instance Eq Bind where
+             (var1 := _) == (var2 := _) = (var1 == var2)
+           """)
+        }
+
+        frame("Вспомогательные функции (продолжение)") {
+            verbatim("""
+            class UPDATE a where (+.) :: a -> a -> a
+           
+            instance UPDATE Env where
+              binds +. binds' = nub (binds' ++ binds)
+            
+            mkEnv :: [Var] -> [EVal] -> Env
+            mkEnv = zipWith (\var val -> (var := val))
+            
+            getDef :: FName -> Prog -> FDef
+            getDef fn p = head [ fd | fd@(DEFINE f _ _) <- p, f == fn ]        
+            """)
+        }
+
+        frame("Интерпретатор TSG") {
+            verbatim("""
+            int :: Prog -> [EVal] -> EVal
+            int p d = eval s p
+                        where (DEFINE f prms _) : p' = p
+                              e = mkEnv prms d
+                              s = ((CALL f prms), e) 
+            """)
+        }
+
+        frame("Функция eval") {
+            verbatim("""
+            eval :: State -> Prog -> EVal
+            eval s@((CALL f args), e) p = eval s' p
+                                          where DEFINE _ prms t' = getDef f p
+                                                e' = mkEnv prms (args /. e)
+                                                s' = (t', e')
+            
+            eval s@((ALT c t1 t2), e) p= case cond c e of
+                                           TRUE ue -> eval (t1, e +. ue) p
+                                           FALSE ue -> eval (t2, e +. ue) p
+            
+            eval s@(RETURN exp, e) p = exp /. e
+            """)
+        }
+
+        frame("Функция cond") {
+            verbatim("""
+            data CondRes = TRUE Env | FALSE Env
+            
+            cond :: Cond -> Env -> CondRes
+            cond (EQA' x y)         e = let x' = x /. e; y' = y /. e in
+                                        case (x', y') of
+                                           (ATOM a, ATOM b) | a == b -> TRUE  []
+                                           (ATOM a, ATOM b)          -> FALSE []
+            
+            cond (CONS' x vh vt va) e = let x' = x/.e in
+                                        case x' of
+                                            CONS h t -> TRUE  [vh := h, vt := t]
+                                            ATOM a   -> FALSE [va := x'] 
             """)
         }
     }
 
-    section("Семантика языка") {
-        subsection("Среда, связи и состояние") {
-
-        }
-
-        subsection("Интерпретатор языка") {
-            frame("Функция int") {
-                verbatim("""
-                fun int(prog: ProgR, d: List<Exp>): Exp {
-                  val f = prog.first()
-                  val env = mkEnv(f.params, d)
-                  return eval(State(CALL(f.name, *f.params.toTypedArray()), env), prog)
-                }
-                
-                data class CondRes(val res: Boolean, val env: Env)
-                
-                fun mkEnv(vars: List<Var>, vals: List<Exp>) = 
-                  vars.zip(vals).map { Bind(it.first, it.second) }
-
-                fun getDef(name: FName, prog: ProgR): FDef? = 
-                  prog.find { f -> f.name == name }
-                """)
-            }
-
-            frame("Функция eval") {
-                verbatim("""
-                fun eval(state: State, prog: ProgR): Exp =
-                  when (val term = state.term) {
-                    is Call -> {
-                      val f = getDef(term.name, prog)!!
-                      val env = mkEnv(f.params, term.args / state.env)
-                      eval(State(f.body, env), prog)
-                    }
-                    is Alt -> {
-                      val condRes = cond(term.cond, state.env)
-                      val env = state.env + condRes.env
-                      val next = if (condRes.res) term.then else term.otherwise
-                      eval(State(next, env), prog)
-                    }
-                    is Ret -> term.exp / state.env
-                  }""")
-            }
-
-            frame("Функция cond") {
-                verbatim("""
-                fun cond(cond: Cond, env: Env): CondRes =
-                  when (cond) {
-                    is IsEqa -> {
-                      val x = cond.x / env
-                      val y = cond.y / env
-                      CondRes(x is Atom && y is Atom && x.name == y.name, listOf())
-                    }
-                    is IsCons -> {
-                      when (val x = cond.exp / env) {
-                        is Cons -> CondRes(true, listOf(Bind(cond.head, x.head), 
-                                                        Bind(cond.tail, x.tail)))
-                        is Atom -> CondRes(false, listOf(Bind(cond.atom, x)))
-                        else -> throw IllegalArgumentException(x.toString())
-                      }
-                    }}""")
-            }
-        }
+    frame("Литература") {
+        allowFrameBreaks()
+        generateBibTex("lecture03")
+        bibliography("plain")
     }
 }
 
